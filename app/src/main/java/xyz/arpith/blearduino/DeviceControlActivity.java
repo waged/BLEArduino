@@ -62,11 +62,13 @@ public class DeviceControlActivity extends Activity {
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
+    public static final String  EXTRA_DATA = "EXTRA_DATA";
 //    private int[] RGBFrame = {0, 0, 0};
     private TextView isSerial;
     private TextView mConnectionState;
     private ToggleButton toggle1, toggle2;
     private String mDeviceName;
+//    private String mReceivedData;
     private String mDeviceAddress;
     //  private ExpandableListView mGattServicesList;
     private BluetoothLeService mBluetoothLeService;
@@ -125,12 +127,19 @@ public class DeviceControlActivity extends Activity {
             }
             else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 Log.e("wegz", "receive data");
-                byte[] value = intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA);
+//                String[] value = intent.getStringArrayExtra(BluetoothLeService.EXTRA_DATA);
+                String value = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                 if(value != null){
-                    displayData(value);
+//                    displayData(value);
+                    Log.e("data in control = ",value.toString());
                 }else{
-                    Log.d(TAG, "value = null");
+                    Log.e(TAG, "value = null");
                 }
+
+//                String uuidStr = intent.getStringExtra(String.valueOf(BluetoothLeService.UUID_HM_RX_TX));
+//                byte[] value = intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA);
+//                onCharacteristicsRead(String.valueOf(HM_RX_TX),value);
+
             }
         }
     };
@@ -149,6 +158,7 @@ public class DeviceControlActivity extends Activity {
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+//        mReceivedData = intent.getStringExtra((EXTRA_DATA));
 
         // Sets up UI references.
         ((TextView) findViewById(R.id.device_address)).setText(mDeviceAddress);
@@ -199,7 +209,7 @@ public class DeviceControlActivity extends Activity {
     }
 
     void sendDataToBLE(String str) {
-        Log.d(TAG, "Sending result=" + str);
+        Log.e(TAG, "Sending result=" + str);
         final byte[] tx = str.getBytes();
         if (mConnected) {
             characteristicTX.setValue(tx);
@@ -314,26 +324,28 @@ public class DeviceControlActivity extends Activity {
         return intentFilter;
     }
 
-//    private void onCharacteristicsRead(String uuidStr, byte[] value) {
-//        Log.i(TAG, "onCharacteristicsRead: " + uuidStr);
-//        if (value != null && value.length > 0) {
-//            final StringBuilder stringBuilder = new StringBuilder(value.length);
-//            for (byte byteChar : value) {
-//                stringBuilder.append(String.format("%02X ", byteChar));
-//            }
-////            displayData(stringBuilder.toString());
-//            Log.e("wegz",stringBuilder.toString());
-//        }
-//    }
+    private void onCharacteristicsRead(String uuidStr, byte[] value) {
+        Log.i(TAG, "onCharacteristicsRead: " + uuidStr);
+        if (value != null && value.length > 0) {
+            final StringBuilder stringBuilder = new StringBuilder(value.length);
+            for (byte byteChar : value) {
+                stringBuilder.append(String.format("%02X ", byteChar));
+            }
+//            displayData(stringBuilder.toString());
+            Log.e("wegz",stringBuilder.toString());
+        }
+    }
 
 
 
     private void displayData(byte[] data) {
         if (data != null) {
+            final StringBuilder strData = new StringBuilder();
+            strData.append(String.format("%d ", data));
             String dataArray = new String(data);
             Log.d(TAG, "data = " + dataArray);
             isSerial.setText(dataArray);
         }
-
     }
+
 }

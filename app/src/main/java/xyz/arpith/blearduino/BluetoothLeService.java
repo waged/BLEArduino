@@ -76,17 +76,15 @@ public class BluetoothLeService extends Service {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
-                Log.i(TAG, "Connected to GATT server.");
+                Log.e(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
-                Log.i(TAG, "Attempting to start service discovery:" +
+                Log.e(TAG, "Attempting to start service discovery:" +
                         mBluetoothGatt.discoverServices());
-
-
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
-                Log.i(TAG, "Disconnected from GATT server.");
+                Log.e(TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
             }
         }
@@ -96,7 +94,7 @@ public class BluetoothLeService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+                Log.e(TAG, "onServicesDiscovered received: " + status);
             }
         }
 
@@ -106,7 +104,6 @@ public class BluetoothLeService extends Service {
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-                Log.e("wegz1","onCharacteristicRead");
             }
         }
 
@@ -115,11 +112,15 @@ public class BluetoothLeService extends Service {
                                             BluetoothGattCharacteristic characteristic) {
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             Log.e("in service","onCharacteristicChanged");
+
         }
     };
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
+
+//        intent.setAction(YOUR_INTENT_FILETR);
+//        sendBroadcast(intent);
         sendBroadcast(intent);
     }
 
@@ -128,13 +129,11 @@ public class BluetoothLeService extends Service {
 
         // For all other profiles, writes the data formatted in HEX.
         final byte[] data = characteristic.getValue();
-        Log.i(TAG, "data"+characteristic.getValue());
-
         if (data != null && data.length > 0) {
             final StringBuilder stringBuilder = new StringBuilder(data.length);
             for(byte byteChar : data)
                 stringBuilder.append(String.format("%02X ", byteChar));
-            Log.d(TAG, String.format("%s", new String(data)));
+//            Log.e("in broadcastUpdate", String.format("%s", new String(data)));
             // getting cut off when longer, need to push on new line, 0A
             intent.putExtra(EXTRA_DATA,String.format("%s", new String(data)));
 
@@ -242,7 +241,7 @@ public class BluetoothLeService extends Service {
      */
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            Log.e(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.disconnect();
